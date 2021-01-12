@@ -45,11 +45,15 @@ class DeepSVDD(object):
         self.ae_trainer = None
         self.ae_optimizer_name = None
 
+        self.decoder = None
+        # a separate decoder network for judging representational ability loss
+
         self.results = {
             'train_time': None,
             'test_auc': None,
             'test_time': None,
             'test_scores': None,
+            'reconstruction_loss': None
         }
 
     def set_network(self, net_name):
@@ -99,15 +103,28 @@ class DeepSVDD(object):
         self.ae_trainer.test(dataset, self.ae_net)
         self.init_network_weights_from_pretraining()
 
-    def reconstruction_loss(self, dataset: BaseADDataset, n_jobs_dataloader: int = 0):
+    def reconstruction_loss(self, dataset: BaseADDataset, n_jobs_dataloader: int = 0, ae_net = self.ae_net):
 
 		train_loader, _ = dataset.loaders(batch_size=self.batch_size, num_workers=self.n_jobs_dataloader)
 		loss = nn.L1Loss()
 		lossval = 0
 		for data in train_loader:
-			self.res = self.ae_net(data)
+			res = ae_net(data)
 			lossval += loss(data,res)
 		return lossval
+
+
+	@staticmethod
+	def init_weights_of_first_network_with_second(netA,netB):
+		netA_dict = netA.state_dict()
+        netB_dict = netB.state_dict()
+
+        # Filter out decoder network keys
+        netB_dict = {k: v for k, v in netB_dict.items() if k in netA_dict}
+        # Overwrite values in the existing state_dict
+        netA_dict.update(netB_dict)
+        
+        netA.load_state_dict(netA_dict)
 
 
     def init_network_weights_from_pretraining(self):
@@ -122,6 +139,23 @@ class DeepSVDD(object):
         net_dict.update(ae_net_dict)
         # Load the new state_dict
         self.net.load_state_dict(net_dict)
+
+    def init_decoder_weights_after_training(self):
+    	self.init_weights_of_first_network_with_second(decoder,ae_net)
+
+    def retrain_decoder(self,dataset: BaseADDataset, optimizer_name: str = 'adam', lr: float = 0.001, n_epochs: int = 100,
+                 lr_milestones: tuple = (), batch_size: int = 128, weight_decay: float = 1e-6, device: str = 'cuda',
+                 n_jobs_dataloader: int = 0):
+    	oldtrainval    = self.net.train
+    	self.net.train = False
+    	ae_net = torch.nn.Sequential(self.net,self.decoder)
+    	ae_trainer = AETrainer(optimizer_name, lr=lr, n_epochs=n_epochs, lr_milestones=lr_milestones,
+                                    batch_size=batch_size, weight_decay=weight_decay, device=device,
+                                    n_jobs_dataloader=n_jobs_dataloader)
+    	ae_trainer.train(dataset,ae_net)
+    	self.ae_trainer.test(dataset, self.ae_net)
+    	self.results['reconstruction_loss'] = reconstruction_loss(self)
+
 
     def save_model(self, export_model, save_ae=True):
         """Save Deep SVDD model to export_model."""
