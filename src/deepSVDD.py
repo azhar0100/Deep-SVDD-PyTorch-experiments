@@ -99,6 +99,17 @@ class DeepSVDD(object):
         self.ae_trainer.test(dataset, self.ae_net)
         self.init_network_weights_from_pretraining()
 
+    def reconstruction_loss(self, dataset: BaseADDataset, n_jobs_dataloader: int = 0):
+
+		train_loader, _ = dataset.loaders(batch_size=self.batch_size, num_workers=self.n_jobs_dataloader)
+		loss = nn.L1Loss()
+		lossval = 0
+		for data in train_loader:
+			self.res = self.ae_net(data)
+			lossval += loss(data,res)
+		return lossval
+
+
     def init_network_weights_from_pretraining(self):
         """Initialize the Deep SVDD network weights from the encoder weights of the pretraining autoencoder."""
 
