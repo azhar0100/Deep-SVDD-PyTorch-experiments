@@ -103,20 +103,21 @@ class DeepSVDD(object):
         self.ae_trainer.test(dataset, self.ae_net)
         self.init_network_weights_from_pretraining()
 
-    def reconstruction_loss(self, dataset: BaseADDataset, n_jobs_dataloader: int = 0, ae_net = self.ae_net):
+    def reconstruction_loss(self, dataset: BaseADDataset, n_jobs_dataloader: int = 0, ae_net = None):
+        if ae_net is None:
+            ae_net = self.ae_net
+        train_loader, _ = dataset.loaders(batch_size=self.batch_size, num_workers=self.n_jobs_dataloader)
+        loss = nn.L1Loss()
+        lossval = 0
+        for data in train_loader:
+            res = ae_net(data)
+            lossval += loss(data,res)
+        return lossval
 
-		train_loader, _ = dataset.loaders(batch_size=self.batch_size, num_workers=self.n_jobs_dataloader)
-		loss = nn.L1Loss()
-		lossval = 0
-		for data in train_loader:
-			res = ae_net(data)
-			lossval += loss(data,res)
-		return lossval
 
-
-	@staticmethod
-	def init_weights_of_first_network_with_second(netA,netB):
-		netA_dict = netA.state_dict()
+    @staticmethod
+    def init_weights_of_first_network_with_second(netA,netB):
+        netA_dict = netA.state_dict()
         netB_dict = netB.state_dict()
 
         # Filter out decoder network keys
@@ -141,20 +142,20 @@ class DeepSVDD(object):
         self.net.load_state_dict(net_dict)
 
     def init_decoder_weights_after_training(self):
-    	self.init_weights_of_first_network_with_second(self.decoder,self.ae_net)
+        self.init_weights_of_first_network_with_second(self.decoder,self.ae_net)
 
     def retrain_decoder(self,dataset: BaseADDataset, optimizer_name: str = 'adam', lr: float = 0.001, n_epochs: int = 100,
                  lr_milestones: tuple = (), batch_size: int = 128, weight_decay: float = 1e-6, device: str = 'cuda',
                  n_jobs_dataloader: int = 0):
-    	oldtrainval    = self.net.train
-    	self.net.train = False
-    	ae_net = torch.nn.Sequential(self.net,self.decoder)
-    	ae_trainer = AETrainer(optimizer_name, lr=lr, n_epochs=n_epochs, lr_milestones=lr_milestones,
+        oldtrainval    = self.net.train
+        self.net.train = False
+        ae_net = torch.nn.Sequential(self.net,self.decoder)
+        ae_trainer = AETrainer(optimizer_name, lr=lr, n_epochs=n_epochs, lr_milestones=lr_milestones,
                                     batch_size=batch_size, weight_decay=weight_decay, device=device,
                                     n_jobs_dataloader=n_jobs_dataloader)
-    	ae_trainer.train(dataset,ae_net)
-    	self.ae_trainer.test(dataset, self.ae_net)
-    	self.results['reconstruction_loss'] = reconstruction_loss(self)
+        ae_trainer.train(dataset,ae_net)
+        self.ae_trainer.test(dataset, self.ae_net)
+        self.results['reconstruction_loss'] = reconstruction_loss(self)
 
 
     def save_model(self, export_model, save_ae=True):

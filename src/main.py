@@ -142,6 +142,7 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
                            weight_decay=cfg.settings['ae_weight_decay'],
                            device=device,
                            n_jobs_dataloader=n_jobs_dataloader)
+        logger.info('Reconstruction loss at pre-training time: {}'.format( deep_SVDD.reconstruction_loss(dataset,n_jobs_dataloader)))
 
     # Log training details
     logger.info('Training optimizer: %s' % cfg.settings['optimizer_name'])
@@ -184,6 +185,17 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
         plot_images_grid(X_outliers, export_img=xp_path + '/outliers', title='Most anomalous examples', padding=2)
 
     if retrain_decoder:
+        deep_SVDD.retrain_decoder(dataset,
+                           optimizer_name=cfg.settings['ae_optimizer_name'],
+                           lr=cfg.settings['ae_lr'],
+                           n_epochs=cfg.settings['ae_n_epochs'],
+                           lr_milestones=cfg.settings['ae_lr_milestone'],
+                           batch_size=cfg.settings['ae_batch_size'],
+                           weight_decay=cfg.settings['ae_weight_decay'],
+                           device=device,
+                           n_jobs_dataloader=n_jobs_dataloader)
+        logger.info('Reconstruction loss at retraining time: {}'.format( deep_SVDD.reconstruction_loss(dataset,n_jobs_dataloader)))
+
 
     # Save results, model, and configuration
     deep_SVDD.save_results(export_json=xp_path + '/results.json')
