@@ -141,7 +141,7 @@ class DeepSVDD(object):
         self.net.load_state_dict(net_dict)
 
     def init_decoder_weights_after_training(self):
-    	self.init_weights_of_first_network_with_second(decoder,ae_net)
+    	self.init_weights_of_first_network_with_second(self.decoder,self.ae_net)
 
     def retrain_decoder(self,dataset: BaseADDataset, optimizer_name: str = 'adam', lr: float = 0.001, n_epochs: int = 100,
                  lr_milestones: tuple = (), batch_size: int = 128, weight_decay: float = 1e-6, device: str = 'cuda',
