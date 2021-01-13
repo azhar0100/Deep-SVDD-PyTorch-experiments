@@ -106,7 +106,7 @@ class DeepSVDD(object):
     def reconstruction_loss(self, dataset: BaseADDataset,batch_size: int = 128, n_jobs_dataloader: int = 0, ae_net = None):
         if ae_net is None:
             ae_net = self.ae_net
-        train_loader, _ = dataset.loaders(batch_size=batch_size, num_workers=self.n_jobs_dataloader)
+        train_loader, _ = dataset.loaders(batch_size=batch_size, num_workers=n_jobs_dataloader)
         loss = nn.L1Loss()
         lossval = 0
         for data in train_loader:
