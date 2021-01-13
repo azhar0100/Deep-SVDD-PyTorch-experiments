@@ -103,10 +103,10 @@ class DeepSVDD(object):
         self.ae_trainer.test(dataset, self.ae_net)
         self.init_network_weights_from_pretraining()
 
-    def reconstruction_loss(self, dataset: BaseADDataset, n_jobs_dataloader: int = 0, ae_net = None):
+    def reconstruction_loss(self, dataset: BaseADDataset,batch_size: int = 128, n_jobs_dataloader: int = 0, ae_net = None):
         if ae_net is None:
             ae_net = self.ae_net
-        train_loader, _ = dataset.loaders(batch_size=self.batch_size, num_workers=self.n_jobs_dataloader)
+        train_loader, _ = dataset.loaders(batch_size=batch_size, num_workers=self.n_jobs_dataloader)
         loss = nn.L1Loss()
         lossval = 0
         for data in train_loader:
