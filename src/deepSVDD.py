@@ -7,6 +7,7 @@ from networks.main import build_network, build_autoencoder
 from networks.mnist_LeNet import MNIST_LeNet_Decoder
 from optim.deepSVDD_trainer import DeepSVDDTrainer
 from optim.ae_trainer import AETrainer
+from optim.dae_trainer import DAETrainer
 
 
 class DeepSVDD(object):
@@ -165,7 +166,7 @@ class DeepSVDD(object):
         self.create_decoder(device)
         self.init_decoder_weights_after_training()
         ae_net = torch.nn.Sequential(self.net,self.decoder)
-        ae_trainer = AETrainer(optimizer_name, lr=lr, n_epochs=n_epochs, lr_milestones=lr_milestones,
+        ae_trainer = DAETrainer(optimizer_name, lr=lr, n_epochs=n_epochs, lr_milestones=lr_milestones,
                                     batch_size=batch_size, weight_decay=weight_decay, device=device,
                                     n_jobs_dataloader=n_jobs_dataloader)
         ae_trainer.train(dataset,ae_net)
