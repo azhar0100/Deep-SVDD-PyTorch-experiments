@@ -17,7 +17,7 @@ class DAETrainer(BaseTrainer):
         super().__init__(optimizer_name, lr, n_epochs, lr_milestones, batch_size, weight_decay, device,
                          n_jobs_dataloader)
 
-    def train(self, dataset: BaseADDataset, ae_net: BaseNet):
+    def train(self, dataset: BaseADDataset, e_net: BaseNet):
         logger = logging.getLogger()
 
         # Set device for network
@@ -28,7 +28,7 @@ class DAETrainer(BaseTrainer):
 
         # Set optimizer (Adam optimizer for now)
         for param in ae_net.parameters():
-            logger.info(param)
+            logger.info(param.requires_grad)
         optimizer = optim.Adam(ae_net.parameters(), lr=self.lr, weight_decay=self.weight_decay,
                                amsgrad=self.optimizer_name == 'amsgrad')
 
