@@ -115,7 +115,9 @@ class DeepSVDD(object):
             inputs,_,_ = data
             inputs = inputs.to(device)
             res = ae_net(inputs)
-            lossval += loss(data,res)
+            outputs = ae_net(inputs)
+            scores = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
+            loss += torch.sum(scores)
         ae_net.train = deftrain
         return lossval
 
