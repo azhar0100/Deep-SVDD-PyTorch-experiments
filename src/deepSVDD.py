@@ -107,7 +107,7 @@ class DeepSVDD(object):
         if ae_net is None:
             ae_net = self.ae_net
         train_loader, _ = dataset.loaders(batch_size=batch_size, num_workers=n_jobs_dataloader)
-        loss = nn.L1Loss()
+        loss = torch.nn.MSELoss(reduction='sum')
         lossval = 0
         for data in train_loader:
             res = ae_net(data)
