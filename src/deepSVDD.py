@@ -162,7 +162,8 @@ class DeepSVDD(object):
     def retrain_decoder(self,dataset: BaseADDataset, optimizer_name: str = 'adam', lr: float = 0.001, n_epochs: int = 100,
                  lr_milestones: tuple = (), batch_size: int = 128, weight_decay: float = 1e-6, device: str = 'cuda',
                  n_jobs_dataloader: int = 0):
-        net = deepcopy(self.net)
+        net = build_network(self.net_name)
+        net.load_state_dict(self.net.state_dict())
         self.create_decoder(device)
         self.init_decoder_weights_after_training()
         net.requires_grad(False)
