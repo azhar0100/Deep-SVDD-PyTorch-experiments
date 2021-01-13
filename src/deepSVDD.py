@@ -8,7 +8,7 @@ from networks.mnist_LeNet import MNIST_LeNet_Decoder
 from optim.deepSVDD_trainer import DeepSVDDTrainer
 from optim.ae_trainer import AETrainer
 from optim.dae_trainer import DAETrainer
-
+from copy import deepcopy
 
 class DeepSVDD(object):
     """A class for the Deep SVDD method.
@@ -162,10 +162,11 @@ class DeepSVDD(object):
     def retrain_decoder(self,dataset: BaseADDataset, optimizer_name: str = 'adam', lr: float = 0.001, n_epochs: int = 100,
                  lr_milestones: tuple = (), batch_size: int = 128, weight_decay: float = 1e-6, device: str = 'cuda',
                  n_jobs_dataloader: int = 0):
-        self.net.train(False)
+        net = deepcopy(self.net)
         self.create_decoder(device)
         self.init_decoder_weights_after_training()
-        ae_net = torch.nn.Sequential(self.net,self.decoder)
+        net.requires_grad(False)
+        ae_net = torch.nn.Sequential(net,self.decoder)
         ae_trainer = DAETrainer(optimizer_name, lr=lr, n_epochs=n_epochs, lr_milestones=lr_milestones,
                                     batch_size=batch_size, weight_decay=weight_decay, device=device,
                                     n_jobs_dataloader=n_jobs_dataloader)
