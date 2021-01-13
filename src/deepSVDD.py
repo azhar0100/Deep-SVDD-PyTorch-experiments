@@ -122,7 +122,7 @@ class DeepSVDD(object):
                 scores = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
                 lossval += torch.sum(scores)
         
-        return lossval
+        return float(lossval)
 
 
     @staticmethod
