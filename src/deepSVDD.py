@@ -103,15 +103,21 @@ class DeepSVDD(object):
         self.ae_trainer.test(dataset, self.ae_net)
         self.init_network_weights_from_pretraining()
 
-    def reconstruction_loss(self, dataset: BaseADDataset,batch_size: int = 128, n_jobs_dataloader: int = 0, ae_net = None):
+    def reconstruction_loss(self, dataset: BaseADDataset,batch_size: int = 128, n_jobs_dataloader: int = 0, 
+                        ae_net = None, device:str = 'cuda'):
         if ae_net is None:
             ae_net = self.ae_net
+        deftrain = ae_net.train
         train_loader, _ = dataset.loaders(batch_size=batch_size, num_workers=n_jobs_dataloader)
         loss = torch.nn.MSELoss(reduction='sum')
         lossval = 0
+        ae_net.train = False
         for data in train_loader:
-            res = ae_net(data)
+            inputs,_,_ = data
+            inputs = inputs.to(device)
+            res = ae_net(inputs)
             lossval += loss(data,res)
+        ae_net.train = deftrain
         return lossval
 
 
