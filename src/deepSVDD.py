@@ -107,18 +107,19 @@ class DeepSVDD(object):
                         ae_net = None, device:str = 'cuda'):
         if ae_net is None:
             ae_net = self.ae_net
-        deftrain = ae_net.train
+        
         train_loader, _ = dataset.loaders(batch_size=batch_size, num_workers=n_jobs_dataloader)
         loss = torch.nn.MSELoss(reduction='sum')
         lossval = 0
-        for data in train_loader:
-            inputs,_,_ = data
-            inputs = inputs.to(device)
-            res = ae_net(inputs)
-            outputs = ae_net(inputs)
-            scores = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
-            lossval += torch.sum(scores)
-        ae_net.train = deftrain
+        with torch.no_grad():
+            for data in train_loader:
+                inputs,_,_ = data
+                inputs = inputs.to(device)
+                res = ae_net(inputs)
+                outputs = ae_net(inputs)
+                scores = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
+                lossval += torch.sum(scores)
+        
         return lossval
 
 
@@ -154,14 +155,13 @@ class DeepSVDD(object):
     def retrain_decoder(self,dataset: BaseADDataset, optimizer_name: str = 'adam', lr: float = 0.001, n_epochs: int = 100,
                  lr_milestones: tuple = (), batch_size: int = 128, weight_decay: float = 1e-6, device: str = 'cuda',
                  n_jobs_dataloader: int = 0):
-        oldtrainval    = self.net.train
-        self.net.train = False
+        self.net.train(False)
         ae_net = torch.nn.Sequential(self.net,self.decoder)
         ae_trainer = AETrainer(optimizer_name, lr=lr, n_epochs=n_epochs, lr_milestones=lr_milestones,
                                     batch_size=batch_size, weight_decay=weight_decay, device=device,
                                     n_jobs_dataloader=n_jobs_dataloader)
         ae_trainer.train(dataset,ae_net)
-        self.ae_trainer.test(dataset, self.ae_net)
+        self.ae_trainer.test(dataset, ae_net)
         self.results['reconstruction_loss'] = reconstruction_loss(self)
 
 
