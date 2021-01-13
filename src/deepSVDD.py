@@ -170,7 +170,7 @@ class DeepSVDD(object):
                                     n_jobs_dataloader=n_jobs_dataloader)
         ae_trainer.train(dataset,ae_net)
         self.ae_trainer.test(dataset, ae_net)
-        self.results['reconstruction_loss'] = reconstruction_loss(self)
+        self.results['reconstruction_loss'] = self.reconstruction_loss(dataset,batch_size,n_jobs_dataloader,ae_net,device)
 
 
     def save_model(self, export_model, save_ae=True):
