@@ -166,7 +166,10 @@ class DeepSVDD(object):
         net.load_state_dict(self.net.state_dict())
         self.create_decoder(device)
         self.init_decoder_weights_after_training()
-        net.requires_grad(False)
+        net.train(False)
+        for param in net.parameters():
+            param.requires_grad = False
+        net.to(device)
         ae_net = torch.nn.Sequential(net,self.decoder)
         ae_trainer = DAETrainer(optimizer_name, lr=lr, n_epochs=n_epochs, lr_milestones=lr_milestones,
                                     batch_size=batch_size, weight_decay=weight_decay, device=device,
