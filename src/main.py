@@ -142,7 +142,7 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
                            weight_decay=cfg.settings['ae_weight_decay'],
                            device=device,
                            n_jobs_dataloader=n_jobs_dataloader)
-        logger.info('Reconstruction loss at pre-training time: {}'.format( deep_SVDD.reconstruction_loss(dataset,cfg.settings['ae_batch_size'],n_jobs_dataloader,device = 'cuda')))
+        logger.info('Reconstruction loss at pre-training time: {}'.format( deep_SVDD.reconstruction_loss(dataset,cfg.settings['ae_batch_size'],n_jobs_dataloader,device = device)))
 
     # Log training details
     logger.info('Training optimizer: %s' % cfg.settings['optimizer_name'])
@@ -194,7 +194,7 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
                            weight_decay=cfg.settings['ae_weight_decay'],
                            device=device,
                            n_jobs_dataloader=n_jobs_dataloader)
-        logger.info('Reconstruction loss at retraining time: {}'.format(deep_SVDD.reconstruction_loss(dataset,cfg.settings['ae_batch_size'],n_jobs_dataloader,device = 'cuda')))
+        logger.info('Reconstruction loss at retraining time: {}'.format(deep_SVDD.reconstruction_loss(dataset,cfg.settings['ae_batch_size'],n_jobs_dataloader,device = device)))
 
 
     # Save results, model, and configuration
