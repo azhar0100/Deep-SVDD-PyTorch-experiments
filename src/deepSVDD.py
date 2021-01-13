@@ -162,7 +162,7 @@ class DeepSVDD(object):
                  lr_milestones: tuple = (), batch_size: int = 128, weight_decay: float = 1e-6, device: str = 'cuda',
                  n_jobs_dataloader: int = 0):
         self.net.train(False)
-        self.create_decoder()
+        self.create_decoder(device)
         self.init_decoder_weights_after_training()
         ae_net = torch.nn.Sequential(self.net,self.decoder)
         ae_trainer = AETrainer(optimizer_name, lr=lr, n_epochs=n_epochs, lr_milestones=lr_milestones,
