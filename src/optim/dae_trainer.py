@@ -17,7 +17,7 @@ class DAETrainer(BaseTrainer):
         super().__init__(optimizer_name, lr, n_epochs, lr_milestones, batch_size, weight_decay, device,
                          n_jobs_dataloader)
 
-    def train(self, dataset: BaseADDataset, e_net: BaseNet):
+    def train(self, dataset: BaseADDataset, ae_net: BaseNet):
         logger = logging.getLogger()
 
         # Set device for network
