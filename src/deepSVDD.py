@@ -2,9 +2,10 @@ import json
 import torch
 
 from base.base_dataset import BaseADDataset
-from networks.main import build_network, build_autoencoder
+from networks.main import build_network, build_autoencoder, build_decoder
 from optim.deepSVDD_trainer import DeepSVDDTrainer
 from optim.ae_trainer import AETrainer
+from optim.de_trainer import DETrainer
 
 
 class DeepSVDD(object):
@@ -111,6 +112,19 @@ class DeepSVDD(object):
         net_dict.update(ae_net_dict)
         # Load the new state_dict
         self.net.load_state_dict(net_dict)
+
+    def posttrain(self, dataset: BaseADDataset, optimizer_name: str = 'adam', lr: float = 0.001, n_epochs: int = 100,
+                 lr_milestones: tuple = (), batch_size: int = 128, weight_decay: float = 1e-6, device: str = 'cuda',
+                 n_jobs_dataloader: int = 0):
+        """Post-trains the weights for the Deep SVDD network \phi via autoencoder."""
+
+        self.de_net = build_decoder(self.net_name)
+        self.de_optimizer_name = optimizer_name
+        self.de_trainer = DETrainer(optimizer_name, lr=lr, n_epochs=n_epochs, lr_milestones=lr_milestones,
+                                    batch_size=batch_size, weight_decay=weight_decay, device=device,
+                                    n_jobs_dataloader=n_jobs_dataloader)
+        self.de_net = self.de_trainer.train(dataset, self.de_net)
+        self.de_trainer.test(dataset, self.de_net)
 
     def save_model(self, export_model, save_ae=True):
         """Save Deep SVDD model to export_model."""

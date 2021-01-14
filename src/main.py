@@ -163,6 +163,25 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
 
     # Test model
     deep_SVDD.test(dataset, device=device, n_jobs_dataloader=n_jobs_dataloader)
+    
+    # Log pretraining details
+    logger.info('Posttraining optimizer: %s' % cfg.settings['ae_optimizer_name'])
+    logger.info('Posttraining learning rate: %g' % cfg.settings['ae_lr'])
+    logger.info('Posttraining epochs: %d' % cfg.settings['ae_n_epochs'])
+    logger.info('Posttraining learning rate scheduler milestones: %s' % (cfg.settings['ae_lr_milestone'],))
+    logger.info('Posttraining batch size: %d' % cfg.settings['ae_batch_size'])
+    logger.info('Posttraining weight decay: %g' % cfg.settings['ae_weight_decay'])
+
+    # Posttrain model on dataset (via decoder)
+    deep_SVDD.posttrain(dataset,
+                        optimizer_name=cfg.settings['ae_optimizer_name'],
+                        lr=cfg.settings['ae_lr'],
+                        n_epochs=cfg.settings['ae_n_epochs'],
+                        lr_milestones=cfg.settings['ae_lr_milestone'],
+                        batch_size=cfg.settings['ae_batch_size'],
+                        weight_decay=cfg.settings['ae_weight_decay'],
+                        device=device,
+                        n_jobs_dataloader=n_jobs_dataloader)
 
     # Plot most anomalous and most normal (within-class) test samples
     indices, labels, scores = zip(*deep_SVDD.results['test_scores'])

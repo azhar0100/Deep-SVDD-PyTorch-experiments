@@ -41,3 +41,13 @@ def build_autoencoder(net_name):
         ae_net = CIFAR10_LeNet_ELU_Autoencoder()
 
     return ae_net
+
+def build_decoder(net_name):
+    """Builds the corresponding autoencoder network."""
+
+    implemented_networks = ('mnist_LeNet')
+    assert net_name in implemented_networks
+
+    de_net = MNIST_LeNet_Decoder()
+
+    return de_net
