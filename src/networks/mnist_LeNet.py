@@ -73,7 +73,10 @@ class MNIST_LeNet_Decoder(BaseNet):
 
     def __init__(self):
         super().__init__()
-
+        
+        self.rep_dim = 32
+        self.pool = nn.MaxPool2d(2, 2)
+        
         # Decoder
         self.deconv1 = nn.ConvTranspose2d(2, 4, 5, bias=False, padding=2)
         self.bn3 = nn.BatchNorm2d(4, eps=1e-04, affine=False)

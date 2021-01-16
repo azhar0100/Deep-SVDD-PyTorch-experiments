@@ -69,6 +69,7 @@ class DeepSVDD(object):
                                        weight_decay=weight_decay, device=device, n_jobs_dataloader=n_jobs_dataloader)
         # Get the model
         self.net = self.trainer.train(dataset, self.net)
+        self.train_outputs = self.trainer.train_outputs
         self.R = float(self.trainer.R.cpu().data.numpy())  # get float
         self.c = self.trainer.c.cpu().data.numpy().tolist()  # get list
         self.results['train_time'] = self.trainer.train_time
@@ -82,6 +83,7 @@ class DeepSVDD(object):
 
         self.trainer.test(dataset, self.net)
         # Get results
+        self.test_outputs = self.trainer.test_outputs
         self.results['test_auc'] = self.trainer.test_auc
         self.results['test_time'] = self.trainer.test_time
         self.results['test_scores'] = self.trainer.test_scores
@@ -112,19 +114,33 @@ class DeepSVDD(object):
         net_dict.update(ae_net_dict)
         # Load the new state_dict
         self.net.load_state_dict(net_dict)
-
+        
+    def init_network_weights_for_posttraining(self):
+        """Initialize the Deep SVDD network from the decoder weights of the pretraining autoencoder"""
+        
+        ae_net_dict = self.ae_net.state_dict()
+        de_net_dict = self.de_net.state_dict()
+        
+        # Filter out decoder network keys
+        ae_net_dict = {k: v for k, v in ae_net_dict.items() if k in de_net_dict}
+        # Overwrite values in the existing state_dict
+        de_net_dict.update(ae_net_dict)
+        # Load the new state_dict
+        self.de_net.load_state_dict(de_net_dict)
+        
     def posttrain(self, dataset: BaseADDataset, optimizer_name: str = 'adam', lr: float = 0.001, n_epochs: int = 100,
                  lr_milestones: tuple = (), batch_size: int = 128, weight_decay: float = 1e-6, device: str = 'cuda',
                  n_jobs_dataloader: int = 0):
         """Post-trains the weights for the Deep SVDD network \phi via autoencoder."""
 
         self.de_net = build_decoder(self.net_name)
+        self.init_network_weights_for_posttraining()
         self.de_optimizer_name = optimizer_name
         self.de_trainer = DETrainer(optimizer_name, lr=lr, n_epochs=n_epochs, lr_milestones=lr_milestones,
                                     batch_size=batch_size, weight_decay=weight_decay, device=device,
                                     n_jobs_dataloader=n_jobs_dataloader)
-        self.de_net = self.de_trainer.train(dataset, self.de_net)
-        self.de_trainer.test(dataset, self.de_net)
+        self.de_net = self.de_trainer.train(dataset, self.train_outputs, self.de_net)
+        self.de_trainer.test(dataset, self.test_outputs, self.de_net)
 
     def save_model(self, export_model, save_ae=True):
         """Save Deep SVDD model to export_model."""

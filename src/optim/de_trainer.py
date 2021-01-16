@@ -17,7 +17,7 @@ class DETrainer(BaseTrainer):
         super().__init__(optimizer_name, lr, n_epochs, lr_milestones, batch_size, weight_decay, device,
                          n_jobs_dataloader)
 
-    def train(self, dataset: BaseADDataset, de_net: BaseNet):
+    def train(self, dataset: BaseADDataset, train_outputs, de_net: BaseNet):
         logger = logging.getLogger()
 
         # Set device for network
@@ -46,18 +46,20 @@ class DETrainer(BaseTrainer):
             loss_epoch = 0.0
             n_batches = 0
             epoch_start_time = time.time()
-            for data in train_loader:
+            for data, enc_input in zip(train_loader,train_outputs):
                 inputs, _, _ = data
                 inputs = inputs.to(self.device)
+                
+                enc_input = enc_input.to(self.device)
 
                 # Zero the network parameter gradients
                 optimizer.zero_grad()
 
                 # Update network parameters via backpropagation: forward + backward + optimize
-                outputs = de_net(inputs)
+                outputs = de_net(enc_input)
                 scores = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
                 loss = torch.mean(scores)
-                loss.backward()
+                loss.backward(retain_graph = True)
                 optimizer.step()
 
                 loss_epoch += loss.item()
@@ -74,7 +76,7 @@ class DETrainer(BaseTrainer):
 
         return de_net
 
-    def test(self, dataset: BaseADDataset, de_net: BaseNet):
+    def test(self, dataset: BaseADDataset, test_outputs, de_net: BaseNet):
         logger = logging.getLogger()
 
         # Set device for network
@@ -91,10 +93,10 @@ class DETrainer(BaseTrainer):
         idx_label_score = []
         de_net.eval()
         with torch.no_grad():
-            for data in test_loader:
+            for data, enc_input in zip(test_loader,test_outputs):
                 inputs, labels, idx = data
                 inputs = inputs.to(self.device)
-                outputs = de_net(inputs)
+                outputs = de_net(enc_input)
                 scores = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
                 loss = torch.mean(scores)
 
