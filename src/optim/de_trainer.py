@@ -34,6 +34,7 @@ class DETrainer(BaseTrainer):
         scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=self.lr_milestones, gamma=0.1)
 
         # Training
+        self.loss_de = []
         logger.info('Starting posttraining...')
         start_time = time.time()
         de_net.train()
@@ -69,6 +70,7 @@ class DETrainer(BaseTrainer):
             epoch_train_time = time.time() - epoch_start_time
             logger.info('  Epoch {}/{}\t Time: {:.3f}\t Loss: {:.8f}'
                         .format(epoch + 1, self.n_epochs, epoch_train_time, loss_epoch / n_batches))
+            self.loss_de.append(loss_epoch / n_batches)
 
         posttrain_time = time.time() - start_time
         logger.info('Posttraining time: %.3f' % posttrain_time)
@@ -109,6 +111,7 @@ class DETrainer(BaseTrainer):
                 n_batches += 1
 
         logger.info('Test set Loss: {:.8f}'.format(loss_epoch / n_batches))
+        self.testloss_de = loss_epoch / n_batches
 
         _, labels, scores = zip(*idx_label_score)
         labels = np.array(labels)

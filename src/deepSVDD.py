@@ -1,5 +1,6 @@
 import json
 import torch
+import matplotlib.pyplot as plt
 
 from base.base_dataset import BaseADDataset
 from networks.main import build_network, build_autoencoder, build_decoder
@@ -101,6 +102,8 @@ class DeepSVDD(object):
         self.ae_net = self.ae_trainer.train(dataset, self.ae_net)
         self.ae_trainer.test(dataset, self.ae_net)
         self.init_network_weights_from_pretraining()
+        self.loss_ae = self.ae_trainer.loss_ae
+        self.testloss_ae = self.ae_trainer.testloss_ae
 
     def init_network_weights_from_pretraining(self):
         """Initialize the Deep SVDD network weights from the encoder weights of the pretraining autoencoder."""
@@ -141,6 +144,9 @@ class DeepSVDD(object):
                                     n_jobs_dataloader=n_jobs_dataloader)
         self.de_net = self.de_trainer.train(dataset, self.train_outputs, self.de_net)
         self.de_trainer.test(dataset, self.test_outputs, self.de_net)
+        self.loss_de = self.de_trainer.loss_de
+        self.testloss_de = self.de_trainer.testloss_de
+        self.compare_AEDE()
 
     def save_model(self, export_model, save_ae=True):
         """Save Deep SVDD model to export_model."""
@@ -170,3 +176,15 @@ class DeepSVDD(object):
         """Save results dict to a JSON-file."""
         with open(export_json, 'w') as fp:
             json.dump(self.results, fp)
+    
+    def compare_AEDE(self):
+        x = range(1,151)
+        plt.figure(figsize=(40,10))
+        plt.subplot(1,2,1)
+        plt.plot(x,self.loss_ae,color='red',label='ae_loss')
+        plt.plot(x,self.loss_de,color='blue',label='de_loss')
+        
+        plt.subplot(1,2,2)
+        plt.bar(['testloss_ae','testloss_de'],[self.testloss_ae,self.testloss_de])
+        plt.savefig('comparison.png')
+        
