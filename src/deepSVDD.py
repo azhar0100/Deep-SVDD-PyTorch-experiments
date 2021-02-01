@@ -137,7 +137,7 @@ class DeepSVDD(object):
         """Post-trains the weights for the Deep SVDD network \phi via autoencoder."""
 
         self.de_net = build_decoder(self.net_name)
-        self.init_network_weights_for_posttraining()
+        #self.init_network_weights_for_posttraining()
         self.de_optimizer_name = optimizer_name
         self.de_trainer = DETrainer(optimizer_name, lr=lr, n_epochs=n_epochs, lr_milestones=lr_milestones,
                                     batch_size=batch_size, weight_decay=weight_decay, device=device,
@@ -147,6 +147,8 @@ class DeepSVDD(object):
         self.loss_de = self.de_trainer.loss_de
         self.testloss_de = self.de_trainer.testloss_de
         self.compare_AEDE()
+        self.compare_train()
+        self.compare_test()
 
     def save_model(self, export_model, save_ae=True):
         """Save Deep SVDD model to export_model."""
@@ -179,12 +181,28 @@ class DeepSVDD(object):
     
     def compare_AEDE(self):
         x = range(1,151)
-        plt.figure(figsize=(40,10))
-        plt.subplot(1,2,1)
-        plt.plot(x,self.loss_ae,color='red',label='ae_loss')
-        plt.plot(x,self.loss_de,color='blue',label='de_loss')
+        plt.figure(figsize=(20,10))        
+        plt.plot(x,self.loss_ae,color='red',label='Orig Autoenc')
+        plt.plot(x,self.loss_de,color='blue',label='After SVDD Loss')
+        plt.title('Training loss comparison')
+        plt.xlabel('epochs')
+        plt.ylabel('loss')
+        plt.legend()
+        plt.savefig('train_comp.png')
         
-        plt.subplot(1,2,2)
-        plt.bar(['testloss_ae','testloss_de'],[self.testloss_ae,self.testloss_de])
-        plt.savefig('comparison.png')
+    def compare_train(self):
+        plt.figure(figsize=(10,10))
+        plt.bar(['Orig Autoenc','After SVDD Loss'],[self.loss_ae[-1],self.loss_de[-1]])
+        plt.title('Final training loss comparison')
+        plt.xlabel('categories')
+        plt.ylabel('loss')
+        plt.savefig('trainloss_comp.png')
+        
+    def compare_test(self):
+        plt.figure(figsize=(10,10))
+        plt.bar(['Orig Autoenc','After SVDD Loss'],[self.testloss_ae,self.testloss_de])
+        plt.title('Test loss comparison')
+        plt.xlabel('categories')
+        plt.ylabel('loss')
+        plt.savefig('testloss_comp.png')
         
