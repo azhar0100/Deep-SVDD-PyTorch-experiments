@@ -20,7 +20,7 @@ class ToyNet(BaseNet):
 
     def forward(self, x):
         x = x.float()
-        logger.info(x.dtype)
+        # logger.info(x.dtype)
         x = self.bn1(x)
         x = self.fc1(x)
         x = torch.nn.functional.relu(x)
@@ -57,10 +57,41 @@ class ToyNetDecoder(BaseNet):
 class ToyNetAutoEncoder(BaseNet):
     def __init__(self):
         super().__init__()
-        self.encoder = ToyNet()
-        self.decoder = ToyNetDecoder()
+        self.rep_dim = 2
+        self.bn1 = nn.BatchNorm1d(4, eps=1e-04, affine=False)
+        self.fc1 = nn.Linear(4, 100, bias=False)
+        self.bn2 = nn.BatchNorm1d(100, eps=1e-04, affine=False)
+        self.fc2 = nn.Linear(100, self.rep_dim, bias=False)
+        self.bn3 = nn.BatchNorm1d(self.rep_dim, eps=1e-04, affine=False)
+
+        self.rep_dim = 2
+        self.dbn1 = nn.BatchNorm1d(self.rep_dim, eps=1e-04, affine=False)
+        self.dfc1 = nn.Linear(self.rep_dim, 100, bias=False)
+        self.dbn2 = nn.BatchNorm1d(100, eps=1e-04, affine=False)
+        self.dfc2 = nn.Linear(100,4, bias=False)
+        self.dbn3 = nn.BatchNorm1d(4, eps=1e-04, affine=False)
+
 
     def forward(self, x):
-        x = self.encoder(x)
-        x = self.decoder(x)
+        # x = self.encoder(x)
+        # x = self.decoder(x)
+
+        x = x.float()
+        x = self.bn1(x)
+        x = self.fc1(x)
+        x = torch.nn.functional.relu(x)
+        x = self.bn2(x)
+        x = self.fc2(x)
+        x = torch.nn.functional.relu(x)
+        x = self.bn3(x)
+
+        x = self.dbn1(x)
+        x = self.dfc1(x)
+        x = torch.nn.functional.relu(x)
+        x = self.dbn2(x)
+        x = self.dfc2(x)
+        x = torch.nn.functional.relu(x)
+        x = self.dbn3(x)
+
+
         return x

@@ -11,13 +11,16 @@ from torch.utils.data import DataLoader
 import numpy as np
 
 
+def normalize_to_zero_one(dat):
+    return (dat - dat.min(axis=0))/(dat.max(axis=0) - dat.min(axis=0))
+
 class Toy_Dataset_Base(Dataset):
 
     def __init__(self, root: str, normal_class=-1):
         super().__init__()
         self.root = root
         self.iris = load_iris(True)
-        self.iris = self.iris[0].astype(np.double),self.iris[1]
+        self.iris = normalize_to_zero_one(self.iris[0].astype(np.double)),self.iris[1]
         self.normal_class = normal_class
 
     def __getitem__(self,index):
