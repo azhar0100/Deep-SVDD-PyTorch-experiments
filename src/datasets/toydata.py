@@ -14,20 +14,24 @@ import numpy as np
 def normalize_to_zero_one(dat):
     return (dat - dat.min(axis=0))/(dat.max(axis=0) - dat.min(axis=0))
 
+def normalize_labels(labels,normal_class):
+    if normal_class != -1:
+        labels[labels == normal_class] = 0
+        labels[labels != normal_class] = 1
+    return labels
+
 class Toy_Dataset_Base(Dataset):
 
     def __init__(self, root: str, normal_class=-1):
         super().__init__()
         self.root = root
         self.iris = load_iris(True)
-        self.iris = normalize_to_zero_one(self.iris[0].astype(np.double)),self.iris[1]
+        self.iris = normalize_to_zero_one(self.iris[0].astype(np.double)),normalize_labels(self.iris[1])
         self.normal_class = normal_class
 
     def __getitem__(self,index):
         datap = self.iris[0][index,:]
         label = self.iris[1][index]
-        if self.normal_class != -1:
-            label = 0 if label == self.normal_class else 1
         idx = index
         return datap,label,idx
 
