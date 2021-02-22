@@ -2,19 +2,61 @@ from torch.utils.data import Subset
 from PIL import Image
 from torchvision.datasets import MNIST
 from base.torchvision_dataset import TorchvisionDataset
+from base.base_dataset import BaseADDataset as BaseDataset
 from .preprocessing import get_target_label_idx, global_contrast_normalization
 from sklearn.datasets import load_iris
 import torchvision.transforms as transforms
+from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
+import numpy as np
 
 
-class Toy_Dataset(TorchvisionDataset):
+class Toy_Dataset_Base(Dataset):
 
-    def __init__(self, root: str, normal_class=0):
-        super().__init__(root)
+    def __init__(self, root: str, normal_class=-1):
+        super().__init__()
+        self.root = root
         self.iris = load_iris(True)
+        self.iris = self.iris[0].astype(np.double),self.iris[1]
+        self.normal_class = normal_class
 
     def __getitem__(self,index):
         datap = self.iris[0][index,:]
         label = self.iris[1][index]
+        if self.normal_class != -1:
+            label = 0 if label == self.normal_class else 1
         idx = index
-        return idx,datap,label
+        return datap,label,idx
+
+    def __len__(self):
+        return len(self.iris[1])
+
+class Toy_Dataset_Subset(Dataset):
+    def __init__(self,basedata : Toy_Dataset_Base,indices):
+        self.base = basedata
+        self.indices = indices
+
+    def __getitem__(self,index):
+        return self.base[self.indices[index]]
+
+    def __len__(self):
+        return len(self.indices)
+
+class Toy_Dataset(TorchvisionDataset):
+
+    def __init__(self, root: str, normal_class = -1):
+        super().__init__(root)
+        self.base = Toy_Dataset_Base(root,normal_class)
+        np.random.seed(0)
+        indices = np.random.permutation(len(self.base.iris[1]))
+        self.train_indices = indices[:100]
+        self.test_indices  = indices[100:]
+        self.train_set = Toy_Dataset_Subset(self.base,self.train_indices)
+        self.test_set  = Toy_Dataset_Subset(self.base,self.test_indices )
+
+    def __getitem__(self,index):
+        return self.base[index]
+
+    def __len__(self):
+        return len(self.base)
+

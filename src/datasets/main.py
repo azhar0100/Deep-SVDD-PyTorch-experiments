@@ -6,7 +6,7 @@ from .toydata import Toy_Dataset
 def load_dataset(dataset_name, data_path, normal_class):
     """Loads the dataset."""
 
-    implemented_datasets = ('mnist', 'cifar10', 'toydata')
+    implemented_datasets = ('mnist', 'cifar10', 'toydataset')
     assert dataset_name in implemented_datasets
 
     dataset = None
@@ -18,7 +18,7 @@ def load_dataset(dataset_name, data_path, normal_class):
         dataset = CIFAR10_Dataset(root=data_path, normal_class=normal_class)
 
     if dataset_name == 'toydataset':
-    	dataset = Toy_Dataset()
+    	dataset = Toy_Dataset(root=data_path,normal_class=normal_class)
 
 
     return dataset
