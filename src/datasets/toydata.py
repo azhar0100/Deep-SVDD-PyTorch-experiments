@@ -26,7 +26,7 @@ class Toy_Dataset_Base(Dataset):
         super().__init__()
         self.root = root
         self.iris = load_iris(True)
-        self.iris = normalize_to_zero_one(self.iris[0].astype(np.double)),normalize_labels(self.iris[1])
+        self.iris = normalize_to_zero_one(self.iris[0].astype(np.double)),normalize_labels(self.iris[1],normal_class)
         self.normal_class = normal_class
 
     def __getitem__(self,index):
