@@ -32,7 +32,7 @@ class Toy_Dataset_Base(Dataset):
     def __getitem__(self,index):
         datap = self.iris[0][index,:]
         label = self.iris[1][index]
-        idx = index
+        idx = np.array([index])
         return datap,label,idx
 
     def __len__(self):
