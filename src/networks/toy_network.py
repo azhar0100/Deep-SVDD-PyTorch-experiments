@@ -11,10 +11,10 @@ class ToyNet(BaseNet):
         super().__init__()
 
         self.rep_dim = 2
-        self.bn1 = nn.BatchNorm2d(3, eps=1e-04, affine=False)
-        self.fc1 = nn.Linear(3, 5, bias=False)
-        self.bn2 = nn.BatchNorm2d(5, eps=1e-04, affine=False)
-        self.fc2 = nn.Linear(5, self.rep_dim, bias=False)
+        self.bn1 = nn.BatchNorm2d(4, eps=1e-04, affine=False)
+        self.fc1 = nn.Linear(4, 100, bias=False)
+        self.bn2 = nn.BatchNorm2d(100, eps=1e-04, affine=False)
+        self.fc2 = nn.Linear(100, self.rep_dim, bias=False)
         self.bn3 = nn.BatchNorm2d(self.rep_dim, eps=1e-04, affine=False)
 
     def forward(self, x):
@@ -25,7 +25,7 @@ class ToyNet(BaseNet):
         x = self.fc2(x)
         x = torch.nn.functional.relu(x)
         x = self.bn3(x)
-        # x = torch.nn.functional.sigmoid(x)        
+        # x = torch.nn.functional.sigmoid(x)
         return x
 
 
@@ -36,10 +36,10 @@ class ToyNetDecoder(BaseNet):
 
         self.rep_dim = 2
         self.bn1 = nn.BatchNorm2d(self.rep_dim, eps=1e-04, affine=False)
-        self.fc1 = nn.Linear(self.rep_dim, 5, bias=False)
-        self.bn2 = nn.BatchNorm2d(5, eps=1e-04, affine=False)
-        self.fc2 = nn.Linear(5,3, bias=False)
-        self.bn3 = nn.BatchNorm2d(3, eps=1e-04, affine=False)
+        self.fc1 = nn.Linear(self.rep_dim, 100, bias=False)
+        self.bn2 = nn.BatchNorm2d(100, eps=1e-04, affine=False)
+        self.fc2 = nn.Linear(100,4, bias=False)
+        self.bn3 = nn.BatchNorm2d(4, eps=1e-04, affine=False)
 
     def forward(self, x):
         x = self.bn1(x)
@@ -48,7 +48,7 @@ class ToyNetDecoder(BaseNet):
         x = self.bn2(x)
         x = self.fc2(x)
         x = torch.nn.functional.relu(x)
-        x = self.bn3(x)     
+        x = self.bn3(x)
         return x
 
 class ToyAutoEncoder(BaseNet):
