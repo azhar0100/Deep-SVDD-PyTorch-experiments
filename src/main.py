@@ -210,5 +210,5 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
     cfg.save_config(export_json=xp_path + config_name)
 
 
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
