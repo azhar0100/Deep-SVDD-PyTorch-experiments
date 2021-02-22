@@ -19,8 +19,8 @@ class ToyNet(BaseNet):
         self.bn3 = nn.BatchNorm1d(self.rep_dim, eps=1e-04, affine=False)
 
     def forward(self, x):
-        # x = x.double()
-        # logger.info(x.shape)
+        x = x.float()
+        logger.info(x.dtype)
         x = self.bn1(x)
         x = self.fc1(x)
         x = torch.nn.functional.relu(x)
