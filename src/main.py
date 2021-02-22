@@ -54,9 +54,12 @@ from datasets.main import load_dataset
 @click.option('--normal_class', type=int, default=0,
               help='Specify the normal class of the dataset (all other classes are considered anomalous).')
 @click.option('--retrain_decoder/--no-retrain-decoder', default=False)
+@click.option('--model_name',type=str, default="model.tar")
+@click.option('--results_name',type=str, default="results.json")
+@click.option('--config_name',type=str, default="config.json")
 def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, objective, nu, device, seed,
          optimizer_name, lr, n_epochs, lr_milestone, batch_size, weight_decay, pretrain, ae_optimizer_name, ae_lr,
-         ae_n_epochs, ae_lr_milestone, ae_batch_size, ae_weight_decay, n_jobs_dataloader, normal_class,retrain_decoder):
+         ae_n_epochs, ae_lr_milestone, ae_batch_size, ae_weight_decay, n_jobs_dataloader, normal_class,retrain_decoder,model_name,results_name,config_name):
     """
     Deep SVDD, a fully deep method for anomaly detection.
 
@@ -202,9 +205,9 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
 
 
     # Save results, model, and configuration
-    deep_SVDD.save_results(export_json=xp_path + '/results.json')
-    deep_SVDD.save_model(export_model=xp_path + '/model.tar')
-    cfg.save_config(export_json=xp_path + '/config.json')
+    deep_SVDD.save_results(export_json=xp_path + results_name)
+    deep_SVDD.save_model(export_model=xp_path + model_name)
+    cfg.save_config(export_json=xp_path + config_name)
 
 
 if __name__ == '__main__':
