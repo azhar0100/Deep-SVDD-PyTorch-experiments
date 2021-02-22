@@ -185,6 +185,8 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
         plot_images_grid(X_outliers, export_img=xp_path + '/outliers', title='Most anomalous examples', padding=2)
 
     if retrain_decoder:
+        # for param in deep_SVDD.net.parameters():
+        #   logger.info("Net parameters before retraining {}".format(param.data))
         deep_SVDD.retrain_decoder(dataset,
                            optimizer_name=cfg.settings['ae_optimizer_name'],
                            lr=cfg.settings['ae_lr'],
@@ -195,6 +197,8 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
                            device=device,
                            n_jobs_dataloader=n_jobs_dataloader)
         logger.info('Reconstruction loss at retraining time: {}'.format(deep_SVDD.reconstruction_loss(dataset,cfg.settings['ae_batch_size'],n_jobs_dataloader,device = device)))
+        # for param in deep_SVDD.net.parameters():
+        #   logger.info("Net parameters after retraining {}".format(param.data))
 
 
     # Save results, model, and configuration

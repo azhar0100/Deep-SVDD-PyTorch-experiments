@@ -2,8 +2,7 @@ import json
 import torch
 
 from base.base_dataset import BaseADDataset
-from networks.main import build_network, build_autoencoder
-from networks.main import build_network, build_autoencoder
+from networks.main import build_network, build_autoencoder,build_decoder
 from networks.mnist_LeNet import MNIST_LeNet_Decoder
 from optim.deepSVDD_trainer import DeepSVDDTrainer
 from optim.ae_trainer import AETrainer
@@ -114,6 +113,7 @@ class DeepSVDD(object):
         train_loader, _ = dataset.loaders(batch_size=batch_size, num_workers=n_jobs_dataloader)
         loss = torch.nn.MSELoss(reduction='sum')
         lossval = 0
+        count = 0
         with torch.no_grad():
             for data in train_loader:
                 inputs,_,_ = data
@@ -122,8 +122,9 @@ class DeepSVDD(object):
                 outputs = ae_net(inputs)
                 scores = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
                 lossval += torch.sum(scores)
+                count += 1
         
-        return float(lossval)
+        return float(lossval)/n
 
 
     @staticmethod
@@ -156,7 +157,7 @@ class DeepSVDD(object):
         self.init_weights_of_first_network_with_second(self.decoder,self.ae_net)
 
     def create_decoder(self, device:str = 'cuda'):
-        self.decoder = MNIST_LeNet_Decoder()
+        self.decoder = build_decoder(self.net_name)
         self.decoder.to(device)
 
     def retrain_decoder(self,dataset: BaseADDataset, optimizer_name: str = 'adam', lr: float = 0.001, n_epochs: int = 100,

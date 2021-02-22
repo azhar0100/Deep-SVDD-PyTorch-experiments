@@ -9,6 +9,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 import numpy as np
+import torch
 
 
 def normalize_to_zero_one(dat):
@@ -30,9 +31,9 @@ class Toy_Dataset_Base(Dataset):
         self.normal_class = normal_class
 
     def __getitem__(self,index):
-        datap = self.iris[0][index,:]
-        label = self.iris[1][index]
-        idx = np.array([index])
+        datap = torch.Tensor(self.iris[0][index,:].tolist())
+        label = np.array([self.iris[1][index]])[0]
+        idx = np.array([index])[0]
         return datap,label,idx
 
     def __len__(self):
@@ -61,7 +62,7 @@ class Toy_Dataset(TorchvisionDataset):
             self.test_indices  = indices[100:]
         else:
             indices = np.random.permutation(len(self.base.iris[1]))
-            normal_indices = self.base.iris[1][indices] == normal_class
+            normal_indices = indices[self.base.iris[1][indices] == normal_class]
             self.train_indices = normal_indices[:int(0.8*len(normal_indices))]
             self.test_indices  = indices[~np.isin(indices,self.train_indices)]
         self.train_set = Toy_Dataset_Subset(self.base,self.train_indices)
