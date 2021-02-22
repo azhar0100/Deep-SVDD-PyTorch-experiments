@@ -25,7 +25,7 @@ class AETrainer(BaseTrainer):
         ae_net.to(self.device)
 
         # Get train data loader
-        logger.info(dataset)
+        # logger.info(dataset)
         train_loader, _ = dataset.loaders(batch_size=self.batch_size, num_workers=self.n_jobs_dataloader)
 
         # Set optimizer (Adam optimizer for now)
@@ -52,7 +52,7 @@ class AETrainer(BaseTrainer):
                 inputs, _, _ = data
                 inputs = inputs.to(self.device)
 
-                logger.info(inputs.shape)
+                # logger.info(inputs.shape)
 
                 # Zero the network parameter gradients
                 optimizer.zero_grad()

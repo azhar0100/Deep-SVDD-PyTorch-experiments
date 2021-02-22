@@ -51,9 +51,15 @@ class Toy_Dataset(TorchvisionDataset):
         super().__init__(root)
         self.base = Toy_Dataset_Base(root,normal_class)
         np.random.seed(0)
-        indices = np.random.permutation(len(self.base.iris[1]))
-        self.train_indices = indices[:100]
-        self.test_indices  = indices[100:]
+        if normal_class = -1
+            indices = np.random.permutation(len(self.base.iris[1]))
+            self.train_indices = indices[:100]
+            self.test_indices  = indices[100:]
+        else:
+            indices = np.random.permutation(len(self.base.iris[1]))
+            normal_indices = self.base.iris[1][indices] == normal_class
+            self.train_indices = normal_indices[:int(0.8*len(normal_indices))]
+            self.test_indices  = indices[~np.isin(indices,train_indices)]
         self.train_set = Toy_Dataset_Subset(self.base,self.train_indices)
         self.test_set  = Toy_Dataset_Subset(self.base,self.test_indices )
 
