@@ -124,7 +124,7 @@ class DeepSVDD(object):
                 lossval += torch.sum(scores)
                 count += 1
         
-        return float(lossval)/n
+        return float(lossval)/count
 
 
     @staticmethod
