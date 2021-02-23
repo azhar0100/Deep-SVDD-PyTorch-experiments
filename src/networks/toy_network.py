@@ -13,9 +13,9 @@ class ToyNet(BaseNet):
 
         self.rep_dim = 2
         self.bn1 = nn.BatchNorm1d(4, eps=1e-04, affine=False)
-        self.fc1 = nn.Linear(4, 100, bias=False)
-        self.bn2 = nn.BatchNorm1d(100, eps=1e-04, affine=False)
-        self.fc2 = nn.Linear(100, self.rep_dim, bias=False)
+        self.fc1 = nn.Linear(4, 400, bias=False)
+        self.bn2 = nn.BatchNorm1d(400, eps=1e-04, affine=False)
+        self.fc2 = nn.Linear(400, self.rep_dim, bias=False)
         self.bn3 = nn.BatchNorm1d(self.rep_dim, eps=1e-04, affine=False)
 
     def forward(self, x):
@@ -39,9 +39,9 @@ class ToyNetDecoder(BaseNet):
 
         self.rep_dim = 2
         self.dbn1 = nn.BatchNorm1d(self.rep_dim, eps=1e-04, affine=False)
-        self.dfc1 = nn.Linear(self.rep_dim, 100, bias=False)
-        self.dbn2 = nn.BatchNorm1d(100, eps=1e-04, affine=False)
-        self.dfc2 = nn.Linear(100,4, bias=False)
+        self.dfc1 = nn.Linear(self.rep_dim, 400, bias=False)
+        self.dbn2 = nn.BatchNorm1d(400, eps=1e-04, affine=False)
+        self.dfc2 = nn.Linear(400,4, bias=False)
         self.dbn3 = nn.BatchNorm1d(4, eps=1e-04, affine=False)
 
     def forward(self, x):
@@ -59,16 +59,16 @@ class ToyNetAutoEncoder(BaseNet):
         super().__init__()
         self.rep_dim = 2
         self.bn1 = nn.BatchNorm1d(4, eps=1e-04, affine=False)
-        self.fc1 = nn.Linear(4, 100, bias=False)
-        self.bn2 = nn.BatchNorm1d(100, eps=1e-04, affine=False)
-        self.fc2 = nn.Linear(100, self.rep_dim, bias=False)
+        self.fc1 = nn.Linear(4, 400, bias=False)
+        self.bn2 = nn.BatchNorm1d(400, eps=1e-04, affine=False)
+        self.fc2 = nn.Linear(400, self.rep_dim, bias=False)
         self.bn3 = nn.BatchNorm1d(self.rep_dim, eps=1e-04, affine=False)
 
         self.rep_dim = 2
         self.dbn1 = nn.BatchNorm1d(self.rep_dim, eps=1e-04, affine=False)
-        self.dfc1 = nn.Linear(self.rep_dim, 100, bias=False)
-        self.dbn2 = nn.BatchNorm1d(100, eps=1e-04, affine=False)
-        self.dfc2 = nn.Linear(100,4, bias=False)
+        self.dfc1 = nn.Linear(self.rep_dim, 400, bias=False)
+        self.dbn2 = nn.BatchNorm1d(400, eps=1e-04, affine=False)
+        self.dfc2 = nn.Linear(400,4, bias=False)
         self.dbn3 = nn.BatchNorm1d(4, eps=1e-04, affine=False)
 
 
