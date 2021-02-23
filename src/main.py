@@ -146,6 +146,7 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
                            device=device,
                            n_jobs_dataloader=n_jobs_dataloader)
         logger.info('Reconstruction loss at pre-training time: {}'.format( deep_SVDD.reconstruction_loss(dataset,cfg.settings['ae_batch_size'],n_jobs_dataloader,device = device)))
+        deep_SVDD.save_model(export_model=xp_path + "pretraining_" + model_name)
 
     # Log training details
     logger.info('Training optimizer: %s' % cfg.settings['optimizer_name'])
@@ -187,6 +188,7 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
         plot_images_grid(X_normals, export_img=xp_path + '/normals', title='Most normal examples', padding=2)
         plot_images_grid(X_outliers, export_img=xp_path + '/outliers', title='Most anomalous examples', padding=2)
 
+    deep_SVDD.save_model(export_model=xp_path + model_name)
     if retrain_decoder:
         # for param in deep_SVDD.net.parameters():
         #   logger.info("Net parameters before retraining {}".format(param.data))
@@ -200,13 +202,13 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
                            device=device,
                            n_jobs_dataloader=n_jobs_dataloader)
         logger.info('Reconstruction loss at retraining time: {}'.format(deep_SVDD.reconstruction_loss(dataset,cfg.settings['ae_batch_size'],n_jobs_dataloader,device = device)))
+        deep_SVDD.save_model(export_model=xp_path + "retraining_" + model_name)
         # for param in deep_SVDD.net.parameters():
         #   logger.info("Net parameters after retraining {}".format(param.data))
 
 
     # Save results, model, and configuration
     deep_SVDD.save_results(export_json=xp_path + results_name)
-    deep_SVDD.save_model(export_model=xp_path + model_name)
     cfg.save_config(export_json=xp_path + config_name)
 
 
