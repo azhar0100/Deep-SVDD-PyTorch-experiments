@@ -65,6 +65,9 @@ class Toy_Dataset(TorchvisionDataset):
             normal_indices = indices[self.base.iris[1][indices] == normal_class]
             self.train_indices = normal_indices[:int(0.8*len(normal_indices))]
             self.test_indices  = indices[~np.isin(indices,self.train_indices)]
+            # self.train_indices[0],self.test_indices[0] = self.test_indices[0], self.train_indices[0]
+            # self.train_indices[0],self.test_indices[0] = self.test_indices[0], self.train_indices[0]
+            # self.train_indices[0],self.test_indices[0] = self.test_indices[0], self.train_indices[0]
         self.train_set = Toy_Dataset_Subset(self.base,self.train_indices)
         self.test_set  = Toy_Dataset_Subset(self.base,self.test_indices )
 
