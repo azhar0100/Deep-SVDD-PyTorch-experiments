@@ -1,0 +1,30 @@
+2021-01-09 02:26:43,448 - root - INFO - Log file is ../log/cifar10_test/log.txt.
+2021-01-09 02:26:43,448 - root - INFO - Data path is ../data.
+2021-01-09 02:26:43,450 - root - INFO - Export path is ../log/cifar10_test.
+2021-01-09 02:26:43,452 - root - INFO - Dataset: cifar10
+2021-01-09 02:26:43,453 - root - INFO - Normal class: 3
+2021-01-09 02:26:43,454 - root - INFO - Network: cifar10_LeNet
+2021-01-09 02:26:43,456 - root - INFO - Deep SVDD objective: one-class
+2021-01-09 02:26:43,457 - root - INFO - Nu-paramerter: 0.10
+2021-01-09 02:26:43,458 - root - INFO - Computation device: cpu
+2021-01-09 02:26:43,459 - root - INFO - Number of dataloader workers: 0
+2021-01-09 03:03:01,590 - root - INFO - Log file is ..\log\cifar10_test/log.txt.
+2021-01-09 03:03:01,628 - root - INFO - Data path is ..\data.
+2021-01-09 03:03:01,629 - root - INFO - Export path is ..\log\cifar10_test.
+2021-01-09 03:03:01,631 - root - INFO - Dataset: cifar10
+2021-01-09 03:03:01,632 - root - INFO - Normal class: 3
+2021-01-09 03:03:01,634 - root - INFO - Network: cifar10_LeNet
+2021-01-09 03:03:01,636 - root - INFO - Deep SVDD objective: one-class
+2021-01-09 03:03:01,638 - root - INFO - Nu-paramerter: 0.10
+2021-01-09 03:03:01,640 - root - INFO - Computation device: cpu
+2021-01-09 03:03:01,644 - root - INFO - Number of dataloader workers: 0
+2021-01-09 03:03:53,789 - root - INFO - Log file is ..\\log\\cifar10_test/log.txt.
+2021-01-09 03:03:53,791 - root - INFO - Data path is ..\\data.
+2021-01-09 03:03:53,791 - root - INFO - Export path is ..\\log\\cifar10_test.
+2021-01-09 03:03:53,793 - root - INFO - Dataset: cifar10
+2021-01-09 03:03:53,796 - root - INFO - Normal class: 3
+2021-01-09 03:03:53,798 - root - INFO - Network: cifar10_LeNet
+2021-01-09 03:03:53,800 - root - INFO - Deep SVDD objective: one-class
+2021-01-09 03:03:53,802 - root - INFO - Nu-paramerter: 0.10
+2021-01-09 03:03:53,802 - root - INFO - Computation device: cpu
+2021-01-09 03:03:53,805 - root - INFO - Number of dataloader workers: 0
