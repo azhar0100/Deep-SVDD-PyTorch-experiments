@@ -1,8 +1,11 @@
 log/*
+log/*/*
+log*
 *.png
 *.gz
 */*.png
 */*.gz
 */*/*.png
 */*/*.gz
+*.orig
 
