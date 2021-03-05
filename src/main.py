@@ -148,7 +148,7 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
                            device=device,
                            n_jobs_dataloader=n_jobs_dataloader)
         # logger.info('Reconstruction loss at pre-training time: {}'.format( deep_SVDD.reconstruction_loss(dataset,cfg.settings['ae_batch_size'],n_jobs_dataloader,device = device)))
-        deep_SVDD.save_model(export_model=xp_path + os.path.sep + "pretraining_" + model_name,True)
+        deep_SVDD.save_model(export_model=xp_path + os.path.sep + "pretraining_" + model_name,save_ae=True)
 
     # Log training details
     logger.info('Training optimizer: %s' % cfg.settings['optimizer_name'])
@@ -215,7 +215,7 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
                             device=device,
                             n_jobs_dataloader=n_jobs_dataloader)
         # logger.info('Reconstruction loss at retraining time: {}'.format(deep_SVDD.reconstruction_loss(dataset,cfg.settings['ae_batch_size'],n_jobs_dataloader,device = device)))
-        deep_SVDD.save_model(export_model=xp_path + os.path.sep + "retraining_" + model_name,True,True)
+        deep_SVDD.save_model(export_model=xp_path + os.path.sep + "retraining_" + model_name,save_ae=True,save_de=True)
         # for param in deep_SVDD.net.parameters():
         #   logger.info("Net parameters after retraining {}".format(param.data))
 
