@@ -105,7 +105,13 @@ class DeepSVDDTrainer(BaseTrainer):
         logger.info('Training time: %.3f' % self.train_time)
 
         logger.info('Finished training.')
-
+        
+        outputs = []
+        for data in train_loader:
+            inputs, _, _ = data
+            outputs.append(net(inputs))
+        self.train_outputs = outputs
+        
         return net
 
     def test(self, dataset: BaseADDataset, net: BaseNet):
@@ -152,6 +158,12 @@ class DeepSVDDTrainer(BaseTrainer):
         logger.info('Test set AUC: {:.2f}%'.format(100. * self.test_auc))
 
         logger.info('Finished testing.')
+        
+        outputs = []
+        for data in test_loader:
+            inputs, _, _ = data
+            outputs.append(net(inputs))
+        self.test_outputs = outputs
 
     def init_center_c(self, train_loader: DataLoader, net: BaseNet, eps=0.1):
         """Initialize hypersphere center c as the mean from an initial forward pass on the data."""

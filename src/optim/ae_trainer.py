@@ -18,12 +18,14 @@ class AETrainer(BaseTrainer):
                          n_jobs_dataloader)
 
     def train(self, dataset: BaseADDataset, ae_net: BaseNet):
-        logger = logging.getLogger()
+        logger = logging.getLogger("AETrainer")
 
         # Set device for network
-        ae_net = ae_net.to(self.device)
+        # ae_net = ae_net.to(self.device)
+        ae_net.to(self.device)
 
         # Get train data loader
+        # logger.info(dataset)
         train_loader, _ = dataset.loaders(batch_size=self.batch_size, num_workers=self.n_jobs_dataloader)
 
         # Set optimizer (Adam optimizer for now)
@@ -34,6 +36,7 @@ class AETrainer(BaseTrainer):
         scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=self.lr_milestones, gamma=0.1)
 
         # Training
+        self.loss_ae = []
         logger.info('Starting pretraining...')
         start_time = time.time()
         ae_net.train()
@@ -49,6 +52,8 @@ class AETrainer(BaseTrainer):
             for data in train_loader:
                 inputs, _, _ = data
                 inputs = inputs.to(self.device)
+
+                # logger.info(inputs.shape)
 
                 # Zero the network parameter gradients
                 optimizer.zero_grad()
@@ -67,6 +72,7 @@ class AETrainer(BaseTrainer):
             epoch_train_time = time.time() - epoch_start_time
             logger.info('  Epoch {}/{}\t Time: {:.3f}\t Loss: {:.8f}'
                         .format(epoch + 1, self.n_epochs, epoch_train_time, loss_epoch / n_batches))
+            self.loss_ae.append(loss_epoch / n_batches)
 
         pretrain_time = time.time() - start_time
         logger.info('Pretraining time: %.3f' % pretrain_time)
@@ -107,6 +113,7 @@ class AETrainer(BaseTrainer):
                 n_batches += 1
 
         logger.info('Test set Loss: {:.8f}'.format(loss_epoch / n_batches))
+        self.testloss_ae = loss_epoch / n_batches
 
         _, labels, scores = zip(*idx_label_score)
         labels = np.array(labels)

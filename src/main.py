@@ -8,14 +8,16 @@ from utils.config import Config
 from utils.visualization.plot_images_grid import plot_images_grid
 from deepSVDD import DeepSVDD
 from datasets.main import load_dataset
+import os
+
 
 
 ################################################################################
 # Settings
 ################################################################################
 @click.command()
-@click.argument('dataset_name', type=click.Choice(['mnist', 'cifar10']))
-@click.argument('net_name', type=click.Choice(['mnist_LeNet', 'cifar10_LeNet', 'cifar10_LeNet_ELU']))
+@click.argument('dataset_name', type=click.Choice(['mnist', 'cifar10','toydataset']))
+@click.argument('net_name', type=click.Choice(['mnist_LeNet', 'cifar10_LeNet', 'cifar10_LeNet_ELU','toynet']))
 @click.argument('xp_path', type=click.Path(exists=True))
 @click.argument('data_path', type=click.Path(exists=True))
 @click.option('--load_config', type=click.Path(exists=True), default=None,
@@ -53,9 +55,13 @@ from datasets.main import load_dataset
               help='Number of workers for data loading. 0 means that the data will be loaded in the main process.')
 @click.option('--normal_class', type=int, default=0,
               help='Specify the normal class of the dataset (all other classes are considered anomalous).')
+@click.option('--retrain_decoder/--no-retrain-decoder', default=False)
+@click.option('--model_name',type=str, default="model.tar")
+@click.option('--results_name',type=str, default="results.json")
+@click.option('--config_name',type=str, default="config.json")
 def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, objective, nu, device, seed,
          optimizer_name, lr, n_epochs, lr_milestone, batch_size, weight_decay, pretrain, ae_optimizer_name, ae_lr,
-         ae_n_epochs, ae_lr_milestone, ae_batch_size, ae_weight_decay, n_jobs_dataloader, normal_class):
+         ae_n_epochs, ae_lr_milestone, ae_batch_size, ae_weight_decay, n_jobs_dataloader, normal_class,retrain_decoder,model_name,results_name,config_name):
     """
     Deep SVDD, a fully deep method for anomaly detection.
 
@@ -73,7 +79,7 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    log_file = xp_path + '/log.txt'
+    log_file = xp_path + os.path.sep + 'log.txt'
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
@@ -141,6 +147,8 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
                            weight_decay=cfg.settings['ae_weight_decay'],
                            device=device,
                            n_jobs_dataloader=n_jobs_dataloader)
+        # logger.info('Reconstruction loss at pre-training time: {}'.format( deep_SVDD.reconstruction_loss(dataset,cfg.settings['ae_batch_size'],n_jobs_dataloader,device = device)))
+        deep_SVDD.save_model(export_model=xp_path + os.path.sep + "pretraining_" + model_name,save_ae=True)
 
     # Log training details
     logger.info('Training optimizer: %s' % cfg.settings['optimizer_name'])
@@ -163,6 +171,15 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
 
     # Test model
     deep_SVDD.test(dataset, device=device, n_jobs_dataloader=n_jobs_dataloader)
+    
+    # Log pretraining details
+    logger.info('Posttraining optimizer: %s' % cfg.settings['ae_optimizer_name'])
+    logger.info('Posttraining learning rate: %g' % cfg.settings['ae_lr'])
+    logger.info('Posttraining epochs: %d' % cfg.settings['ae_n_epochs'])
+    logger.info('Posttraining learning rate scheduler milestones: %s' % (cfg.settings['ae_lr_milestone'],))
+    logger.info('Posttraining batch size: %d' % cfg.settings['ae_batch_size'])
+    logger.info('Posttraining weight decay: %g' % cfg.settings['ae_weight_decay'])
+
 
     # Plot most anomalous and most normal (within-class) test samples
     indices, labels, scores = zip(*deep_SVDD.results['test_scores'])
@@ -179,13 +196,34 @@ def main(dataset_name, net_name, xp_path, data_path, load_config, load_model, ob
             X_normals = torch.tensor(np.transpose(dataset.test_set.test_data[idx_sorted[:32], ...], (0, 3, 1, 2)))
             X_outliers = torch.tensor(np.transpose(dataset.test_set.test_data[idx_sorted[-32:], ...], (0, 3, 1, 2)))
 
-        plot_images_grid(X_normals, export_img=xp_path + '/normals', title='Most normal examples', padding=2)
-        plot_images_grid(X_outliers, export_img=xp_path + '/outliers', title='Most anomalous examples', padding=2)
+        plot_images_grid(X_normals, export_img=xp_path + os.path.sep + '/normals', title='Most normal examples', padding=2)
+        plot_images_grid(X_outliers, export_img=xp_path + os.path.sep + '/outliers', title='Most anomalous examples', padding=2)
+
+    deep_SVDD.save_model(export_model=xp_path + os.path.sep + model_name)
+    if retrain_decoder:
+        # for param in deep_SVDD.net.parameters():
+        #   logger.info("Net parameters before retraining {}".format(param.data))
+
+        # Posttrain model on dataset (via decoder)
+        deep_SVDD.posttrain(dataset,
+                            optimizer_name=cfg.settings['ae_optimizer_name'],
+                            lr=cfg.settings['ae_lr'],
+                            n_epochs=cfg.settings['ae_n_epochs'],
+                            lr_milestones=cfg.settings['ae_lr_milestone'],
+                            batch_size=cfg.settings['ae_batch_size'],
+                            weight_decay=cfg.settings['ae_weight_decay'],
+                            device=device,
+                            n_jobs_dataloader=n_jobs_dataloader)
+        # logger.info('Reconstruction loss at retraining time: {}'.format(deep_SVDD.reconstruction_loss(dataset,cfg.settings['ae_batch_size'],n_jobs_dataloader,device = device)))
+        deep_SVDD.save_model(export_model=xp_path + os.path.sep + "retraining_" + model_name,save_ae=True,save_de=True)
+        # for param in deep_SVDD.net.parameters():
+        #   logger.info("Net parameters after retraining {}".format(param.data))
+
 
     # Save results, model, and configuration
-    deep_SVDD.save_results(export_json=xp_path + '/results.json')
-    deep_SVDD.save_model(export_model=xp_path + '/model.tar')
-    cfg.save_config(export_json=xp_path + '/config.json')
+    deep_SVDD.save_results(export_json=xp_path + os.path.sep + results_name)
+    cfg.save_config(export_json=xp_path + os.path.sep + config_name)
+    deep_SVDD.save_graphs(xp_path)
 
 
 if __name__ == '__main__':
