@@ -18,7 +18,7 @@ class DETrainer(BaseTrainer):
                          n_jobs_dataloader)
 
     def train(self, dataset: BaseADDataset, train_outputs, de_net: BaseNet):
-        logger = logging.getLogger()
+        logger = logging.getLogger("DETrainer")
 
         # Set device for network
         de_net = de_net.to(self.device)
@@ -32,7 +32,8 @@ class DETrainer(BaseTrainer):
 
         # Set learning rate scheduler
         scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=self.lr_milestones, gamma=0.1)
-
+        logger.info(self.lr)
+        
         # Training
         self.loss_de = []
         logger.info('Starting posttraining...')
