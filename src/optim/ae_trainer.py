@@ -34,9 +34,7 @@ class AETrainer(BaseTrainer):
 
         # Set learning rate scheduler
         scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=self.lr_milestones, gamma=0.1)
-        self.lista = scheduler.get_last_lr()
-        self.finalLR = self.lista[-1]
-        logger.info(self.finalLR)
+        
 
 
         # Training
@@ -81,6 +79,10 @@ class AETrainer(BaseTrainer):
         pretrain_time = time.time() - start_time
         logger.info('Pretraining time: %.3f' % pretrain_time)
         logger.info('Finished pretraining.')
+        
+        self.lista = scheduler.get_last_lr()
+        self.finalLR = self.lista[-1]
+        logger.info(self.finalLR)
 
         return ae_net
 
