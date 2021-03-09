@@ -81,7 +81,7 @@ class AETrainer(BaseTrainer):
         logger.info('Finished pretraining.')
         
         self.lista = scheduler.get_last_lr()
-        self.finalLR = self.lista[-1]
+        self.finalLR = float(self.lista[-1])
         logger.info(self.finalLR)
 
         return ae_net
