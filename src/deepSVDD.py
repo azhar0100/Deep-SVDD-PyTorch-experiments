@@ -108,6 +108,7 @@ class DeepSVDD(object):
         self.ae_net = self.ae_trainer.train(dataset, self.ae_net)
         self.ae_trainer.test(dataset, self.ae_net)
         self.init_network_weights_from_pretraining()
+        self.finalLR = self.ae_trainer.lr
         self.loss_ae = self.ae_trainer.loss_ae
         self.testloss_ae = self.ae_trainer.testloss_ae
 
@@ -145,7 +146,7 @@ class DeepSVDD(object):
         self.de_net = build_decoder(self.net_name)
         self.init_network_weights_for_posttraining()
         self.de_optimizer_name = optimizer_name
-        self.de_trainer = DETrainer(optimizer_name, lr=lr, n_epochs=n_epochs, lr_milestones=lr_milestones,
+        self.de_trainer = DETrainer(optimizer_name, lr=self.finalLR, n_epochs=n_epochs, lr_milestones=lr_milestones,
                                     batch_size=batch_size, weight_decay=weight_decay, device=device,
                                     n_jobs_dataloader=n_jobs_dataloader)
         self.de_net = self.de_trainer.train(dataset, self.train_outputs, self.de_net)
