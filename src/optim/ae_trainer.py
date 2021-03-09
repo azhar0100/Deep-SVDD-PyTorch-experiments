@@ -34,7 +34,8 @@ class AETrainer(BaseTrainer):
 
         # Set learning rate scheduler
         scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=self.lr_milestones, gamma=0.1)
-        self.finalLR = scheduler.get_last_lr()
+        self.lista = scheduler.get_last_lr()
+        self.finalLR = self.lista[-1]
 
 
         # Training
