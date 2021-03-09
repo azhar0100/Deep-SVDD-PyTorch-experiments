@@ -109,7 +109,7 @@ class DeepSVDD(object):
         self.ae_trainer.test(dataset, self.ae_net)
         self.init_network_weights_from_pretraining()
         self.finalLR = self.ae_trainer.finalLR
-        logger.info(f'Yahan se arha{self.finalLR}')
+        print(f'Yahan se arha{self.finalLR}')
         self.loss_ae = self.ae_trainer.loss_ae
         self.testloss_ae = self.ae_trainer.testloss_ae
 
