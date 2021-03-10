@@ -47,7 +47,8 @@ class DeepSVDDTrainer(BaseTrainer):
         train_loader, _ = dataset.loaders(batch_size=self.batch_size, num_workers=self.n_jobs_dataloader)
 
         # Set optimizer (Adam optimizer for now)
-        optimizer = optim.Adam([{en_net.parameters()}, {de_net.parameters()}], lr=self.lr, weight_decay=self.weight_decay,
+        optimizer = optim.Adam([{"params": en_net.parameters()}, {"params": de_net.parameters()}], 
+                               lr=self.lr, weight_decay=self.weight_decay,
                                amsgrad=self.optimizer_name == 'amsgrad')
 
         # Set learning rate scheduler
