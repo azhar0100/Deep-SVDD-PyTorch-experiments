@@ -26,6 +26,7 @@ class DeepSVDDTrainer(BaseTrainer):
         self.R = torch.tensor(R, device=self.device)  # radius R initialized with 0 by default.
         self.c = torch.tensor(c, device=self.device) if c is not None else None
         self.nu = nu
+        self.beta = beta
 
         # Optimization parameters
         self.warm_up_n_epochs = 10  # number of training epochs for soft-boundary Deep SVDD before radius R gets updated
@@ -90,7 +91,7 @@ class DeepSVDDTrainer(BaseTrainer):
                 dist2 = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
                 loss2 = torch.mean(dist2)
                 
-                loss = ((1 - beta) * loss1) + (beta * loss2)
+                loss = ((1 - self.beta) * loss1) + (self.beta * loss2)
 
                 loss.backward()
                 optimizer.step()
@@ -143,7 +144,7 @@ class DeepSVDDTrainer(BaseTrainer):
                 dist2 = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
                 loss2 = torch.mean(dist2)
                 
-                loss = ((1 - beta) * loss1) + (beta * loss2)
+                loss = ((1 - self.beta) * loss1) + (self.beta * loss2)
                 scores = dist1
 
                 # Save triples of (idx, label, score) in a list
