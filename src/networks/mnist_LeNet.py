@@ -28,6 +28,7 @@ class MNIST_LeNet_Encoder(BaseNet):
         x = self.fc1(x)
         return x
 
+MNIST_LeNet = MNIST_LeNet_Encoder
 class MNIST_LeNet_Decoder(BaseNet):
     
     def __init__(self):
