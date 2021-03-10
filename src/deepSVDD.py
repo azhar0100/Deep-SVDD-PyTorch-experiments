@@ -103,15 +103,26 @@ class DeepSVDD(object):
     def init_network_weights_from_pretraining(self):
         """Initialize the Deep SVDD network weights from the encoder weights of the pretraining autoencoder."""
 
-        net_dict = self.net.state_dict()
+        en_net_dict = self.en_net.state_dict()
         ae_net_dict = self.ae_net.state_dict()
 
         # Filter out decoder network keys
-        ae_net_dict = {k: v for k, v in ae_net_dict.items() if k in net_dict}
+        ae_net_dict = {k: v for k, v in ae_net_dict.items() if k in en_net_dict}
         # Overwrite values in the existing state_dict
-        net_dict.update(ae_net_dict)
+        en_net_dict.update(ae_net_dict)
         # Load the new state_dict
-        self.net.load_state_dict(net_dict)
+        self.en_net.load_state_dict(en_net_dict)
+        
+        
+        de_net_dict = self.de_net.state_dict()
+        ae_net_dict = self.ae_net.state_dict()
+
+        # Filter out decoder network keys
+        ae_net_dict = {k: v for k, v in ae_net_dict.items() if k in de_net_dict}
+        # Overwrite values in the existing state_dict
+        de_net_dict.update(ae_net_dict)
+        # Load the new state_dict
+        self.de_net.load_state_dict(de_net_dict)
 
     def save_model(self, export_model, save_ae=True):
         """Save Deep SVDD model to export_model."""
