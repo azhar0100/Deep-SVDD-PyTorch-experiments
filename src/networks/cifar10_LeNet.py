@@ -32,7 +32,7 @@ class CIFAR10_LeNet_Encoder(BaseNet):
         x = self.fc1(x)
         return x
 
-class CIFAR10_LeNet_Decoder(Basenet):
+class CIFAR10_LeNet_Decoder(BaseNet):
     
     def __init__(self):
         super().__init__()
