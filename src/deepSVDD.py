@@ -36,7 +36,8 @@ class DeepSVDD(object):
         self.c = None  # hypersphere center c
 
         self.net_name = None
-        self.net = None  # neural network \phi
+        self.en_net = None  # neural network \phi
+        self.de_net = None
 
         self.trainer = None
         self.optimizer_name = None
@@ -55,19 +56,19 @@ class DeepSVDD(object):
     def set_network(self, net_name):
         """Builds the neural network \phi."""
         self.net_name = net_name
-        self.net = build_network(net_name)
+        self.en_net, self.de_net = build_network(net_name)
 
     def train(self, dataset: BaseADDataset, optimizer_name: str = 'adam', lr: float = 0.001, n_epochs: int = 50,
               lr_milestones: tuple = (), batch_size: int = 128, weight_decay: float = 1e-6, device: str = 'cuda',
-              n_jobs_dataloader: int = 0):
+              n_jobs_dataloader: int = 0, beta: float = 0.05):
         """Trains the Deep SVDD model on the training data."""
 
         self.optimizer_name = optimizer_name
         self.trainer = DeepSVDDTrainer(self.objective, self.R, self.c, self.nu, optimizer_name, lr=lr,
                                        n_epochs=n_epochs, lr_milestones=lr_milestones, batch_size=batch_size,
-                                       weight_decay=weight_decay, device=device, n_jobs_dataloader=n_jobs_dataloader)
+                                       weight_decay=weight_decay, device=device, n_jobs_dataloader=n_jobs_dataloader, beta=0.05)
         # Get the model
-        self.net = self.trainer.train(dataset, self.net)
+        self.net = self.trainer.train(dataset, self.en_net, self.de_net)
         self.R = float(self.trainer.R.cpu().data.numpy())  # get float
         self.c = self.trainer.c.cpu().data.numpy().tolist()  # get list
         self.results['train_time'] = self.trainer.train_time

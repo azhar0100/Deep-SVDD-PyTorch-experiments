@@ -15,7 +15,7 @@ class DeepSVDDTrainer(BaseTrainer):
 
     def __init__(self, objective, R, c, nu: float, optimizer_name: str = 'adam', lr: float = 0.001, n_epochs: int = 150,
                  lr_milestones: tuple = (), batch_size: int = 128, weight_decay: float = 1e-6, device: str = 'cuda',
-                 n_jobs_dataloader: int = 0):
+                 n_jobs_dataloader: int = 0, beta: float = 0.05):
         super().__init__(optimizer_name, lr, n_epochs, lr_milestones, batch_size, weight_decay, device,
                          n_jobs_dataloader)
 
@@ -36,17 +36,18 @@ class DeepSVDDTrainer(BaseTrainer):
         self.test_time = None
         self.test_scores = None
 
-    def train(self, dataset: BaseADDataset, net: BaseNet):
+    def train(self, dataset: BaseADDataset, en_net: BaseNet, de_net: BaseNet):
         logger = logging.getLogger()
 
         # Set device for network
-        net = net.to(self.device)
+        en_net = en_net.to(self.device)
+        de_net = de_net.to(self.device)
 
         # Get train data loader
         train_loader, _ = dataset.loaders(batch_size=self.batch_size, num_workers=self.n_jobs_dataloader)
 
         # Set optimizer (Adam optimizer for now)
-        optimizer = optim.Adam(net.parameters(), lr=self.lr, weight_decay=self.weight_decay,
+        optimizer = optim.Adam([{en_net.parameters()}, {de_net.parameters()}], lr=self.lr, weight_decay=self.weight_decay,
                                amsgrad=self.optimizer_name == 'amsgrad')
 
         # Set learning rate scheduler
@@ -61,7 +62,8 @@ class DeepSVDDTrainer(BaseTrainer):
         # Training
         logger.info('Starting training...')
         start_time = time.time()
-        net.train()
+        en_net.train()
+        de_net.train()
         for epoch in range(self.n_epochs):
 
             scheduler.step()
@@ -79,13 +81,16 @@ class DeepSVDDTrainer(BaseTrainer):
                 optimizer.zero_grad()
 
                 # Update network parameters via backpropagation: forward + backward + optimize
-                outputs = net(inputs)
-                dist = torch.sum((outputs - self.c) ** 2, dim=1)
-                if self.objective == 'soft-boundary':
-                    scores = dist - self.R ** 2
-                    loss = self.R ** 2 + (1 / self.nu) * torch.mean(torch.max(torch.zeros_like(scores), scores))
-                else:
-                    loss = torch.mean(dist)
+                en_outputs = en_net(inputs)
+                outputs = de_net(en_outputs)
+                dist1 = torch.sum((en_outputs - self.c) ** 2, dim=1)
+                loss1 = torch.mean(dist1)
+                
+                dist2 = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
+                loss2 = torch.mean(dist2)
+                
+                loss = ((1 - beta) * loss1) + (beta * loss2)
+
                 loss.backward()
                 optimizer.step()
 
@@ -108,11 +113,12 @@ class DeepSVDDTrainer(BaseTrainer):
 
         return net
 
-    def test(self, dataset: BaseADDataset, net: BaseNet):
+    def test(self, dataset: BaseADDataset, en_net: BaseNet, de_net: BaseNet):
         logger = logging.getLogger()
 
         # Set device for network
-        net = net.to(self.device)
+        en_net = en_net.to(self.device)
+        de_net = de_net.to(self.device)
 
         # Get test data loader
         _, test_loader = dataset.loaders(batch_size=self.batch_size, num_workers=self.n_jobs_dataloader)
@@ -121,17 +127,23 @@ class DeepSVDDTrainer(BaseTrainer):
         logger.info('Starting testing...')
         start_time = time.time()
         idx_label_score = []
-        net.eval()
+        en_net.eval()
+        de_net.eval()
         with torch.no_grad():
             for data in test_loader:
                 inputs, labels, idx = data
                 inputs = inputs.to(self.device)
-                outputs = net(inputs)
-                dist = torch.sum((outputs - self.c) ** 2, dim=1)
-                if self.objective == 'soft-boundary':
-                    scores = dist - self.R ** 2
-                else:
-                    scores = dist
+                en_outputs = en_net(inputs)
+                outputs = de_net(en_outputs)
+                
+                dist1 = torch.sum((en_outputs - self.c) ** 2, dim=1)
+                loss1 = torch.mean(dist1)
+                
+                dist2 = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
+                loss2 = torch.mean(dist2)
+                
+                loss = ((1 - beta) * loss1) + (beta * loss2)
+                scores = dist1
 
                 # Save triples of (idx, label, score) in a list
                 idx_label_score += list(zip(idx.cpu().data.numpy().tolist(),

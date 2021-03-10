@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from base.base_net import BaseNet
 
 
-class CIFAR10_LeNet(BaseNet):
+class CIFAR10_LeNet_Encoder(BaseNet):
 
     def __init__(self):
         super().__init__()
@@ -32,7 +32,37 @@ class CIFAR10_LeNet(BaseNet):
         x = self.fc1(x)
         return x
 
+class CIFAR10_LeNet_Decoder(Basenet):
+    
+    def __init__(self):
+        super().__init__()
 
+        self.rep_dim = 128
+        self.pool = nn.MaxPool2d(2, 2)
+        
+        # Decoder
+        self.deconv1 = nn.ConvTranspose2d(int(self.rep_dim / (4 * 4)), 128, 5, bias=False, padding=2)
+        self.bn2d4 = nn.BatchNorm2d(128, eps=1e-04, affine=False)
+        self.deconv2 = nn.ConvTranspose2d(128, 64, 5, bias=False, padding=2)
+        self.bn2d5 = nn.BatchNorm2d(64, eps=1e-04, affine=False)
+        self.deconv3 = nn.ConvTranspose2d(64, 32, 5, bias=False, padding=2)
+        self.bn2d6 = nn.BatchNorm2d(32, eps=1e-04, affine=False)
+        self.deconv4 = nn.ConvTranspose2d(32, 3, 5, bias=False, padding=2)
+        
+    def forward(self, x):
+        x = x.view(x.size(0), int(self.rep_dim / (4 * 4)), 4, 4)
+        x = F.leaky_relu(x)
+        x = self.deconv1(x)
+        x = F.interpolate(F.leaky_relu(self.bn2d4(x)), scale_factor=2)
+        x = self.deconv2(x)
+        x = F.interpolate(F.leaky_relu(self.bn2d5(x)), scale_factor=2)
+        x = self.deconv3(x)
+        x = F.interpolate(F.leaky_relu(self.bn2d6(x)), scale_factor=2)
+        x = self.deconv4(x)
+        x = torch.sigmoid(x)
+        return x
+
+        
 class CIFAR10_LeNet_Autoencoder(BaseNet):
 
     def __init__(self):
