@@ -57,7 +57,7 @@ class DeepSVDDTrainer(BaseTrainer):
         # Initialize hypersphere center c (if c not loaded)
         if self.c is None:
             logger.info('Initializing center c...')
-            self.c = self.init_center_c(train_loader, net)
+            self.c = self.init_center_c(train_loader, en_net)
             logger.info('Center c initialized.')
 
         # Training
