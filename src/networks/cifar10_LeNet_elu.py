@@ -31,7 +31,8 @@ class CIFAR10_LeNet_ELU_Encoder(BaseNet):
         x = x.view(x.size(0), -1)
         x = self.fc1(x)
         return x
-    
+
+CIFAR10_LeNet_ELU = CIFAR10_LeNet_ELU_Encoder
 class CIFAR10_LeNet_ELU_Decoder(BaseNet):
     
     def __init__(self):
