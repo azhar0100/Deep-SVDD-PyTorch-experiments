@@ -68,7 +68,7 @@ class DeepSVDD(object):
                                        n_epochs=n_epochs, lr_milestones=lr_milestones, batch_size=batch_size,
                                        weight_decay=weight_decay, device=device, n_jobs_dataloader=n_jobs_dataloader, beta=beta)
         # Get the model
-        self.net = self.trainer.train(dataset, self.en_net, self.de_net)
+        self.en_net, self.de_net = self.trainer.train(dataset, self.en_net, self.de_net)
         self.R = float(self.trainer.R.cpu().data.numpy())  # get float
         self.c = self.trainer.c.cpu().data.numpy().tolist()  # get list
         self.results['train_time'] = self.trainer.train_time

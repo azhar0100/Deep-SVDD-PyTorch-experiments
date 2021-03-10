@@ -113,7 +113,7 @@ class DeepSVDDTrainer(BaseTrainer):
 
         logger.info('Finished training.')
 
-        return net
+        return en_net, de_net
 
     def test(self, dataset: BaseADDataset, en_net: BaseNet, de_net: BaseNet):
         logger = logging.getLogger()
