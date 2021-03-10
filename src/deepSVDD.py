@@ -111,8 +111,7 @@ class DeepSVDD(object):
         # Overwrite values in the existing state_dict
         en_net_dict.update(ae_net_dict)
         # Load the new state_dict
-        self.en_net.load_state_dict(en_net_dict)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-        
+        self.en_net.load_state_dict(en_net_dict)                                                                                             
         
         de_net_dict = self.de_net.state_dict()
         ae_net_dict = self.ae_net.state_dict()
@@ -127,12 +126,14 @@ class DeepSVDD(object):
     def save_model(self, export_model, save_ae=True):
         """Save Deep SVDD model to export_model."""
 
-        net_dict = self.net.state_dict()
+        en_net_dict = self.en_net.state_dict()
+        de_net_dict = self.de_net.state_dict()
         ae_net_dict = self.ae_net.state_dict() if save_ae else None
 
         torch.save({'R': self.R,
                     'c': self.c,
-                    'net_dict': net_dict,
+                    'en_net_dict': en_net_dict,
+                    'de_net_dict': de_net_dict,
                     'ae_net_dict': ae_net_dict}, export_model)
 
     def load_model(self, model_path, load_ae=False):
@@ -142,7 +143,8 @@ class DeepSVDD(object):
 
         self.R = model_dict['R']
         self.c = model_dict['c']
-        self.net.load_state_dict(model_dict['net_dict'])
+        self.en_net.load_state_dict(model_dict['en_net_dict'])
+        self.de_net.load_state_dict(model_dict['de_net_dict'])
         if load_ae:
             if self.ae_net is None:
                 self.ae_net = build_autoencoder(self.net_name)
