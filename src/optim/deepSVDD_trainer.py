@@ -100,13 +100,15 @@ class DeepSVDDTrainer(BaseTrainer):
                 if (self.objective == 'soft-boundary') and (epoch >= self.warm_up_n_epochs):
                     self.R.data = torch.tensor(get_radius(dist, self.nu), device=self.device)
 
-                loss_epoch += loss.item()
+                loss1_epoch += loss1.item()
                 n_batches += 1
+                
+                loss2_epoch += loss2.item()
 
             # log epoch statistics
             epoch_train_time = time.time() - epoch_start_time
-            logger.info('  Epoch {}/{}\t Time: {:.3f}\t Loss: {:.8f}'
-                        .format(epoch + 1, self.n_epochs, epoch_train_time, loss_epoch / n_batches))
+            logger.info('  Epoch {}/{}\t Time: {:.3f}\t Loss_en: {:.8f}\t Loss_ae: {:.8f}'
+                        .format(epoch + 1, self.n_epochs, epoch_train_time, loss1_epoch / n_batches, loss2_epoch / n_batches))
 
         self.train_time = time.time() - start_time
         logger.info('Training time: %.3f' % self.train_time)
