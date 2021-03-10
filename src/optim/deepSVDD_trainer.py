@@ -72,7 +72,8 @@ class DeepSVDDTrainer(BaseTrainer):
             if epoch in self.lr_milestones:
                 logger.info('  LR scheduler: new learning rate is %g' % float(scheduler.get_lr()[0]))
 
-            loss_epoch = 0.0
+            loss1_epoch = 0.0
+            loss2_epoch = 0.0
             n_batches = 0
             epoch_start_time = time.time()
             for data in train_loader:
