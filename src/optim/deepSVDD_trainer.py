@@ -92,7 +92,7 @@ class DeepSVDDTrainer(BaseTrainer):
                 dist2 = torch.sum((outputs - inputs) ** 2, dim=tuple(range(1, outputs.dim())))
                 loss2 = torch.mean(dist2)
                 
-                loss = ((1 - self.beta) * loss1) + (self.beta * loss2)
+                loss = ((1 - self.beta) * loss1) + (self.beta * loss2/(torch.sum(loss2 ** 2)**0.5))
 
                 loss.backward()
                 optimizer.step()
