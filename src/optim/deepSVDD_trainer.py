@@ -108,8 +108,8 @@ class DeepSVDDTrainer(BaseTrainer):
 
             # log epoch statistics
             epoch_train_time = time.time() - epoch_start_time
-            logger.info('  Epoch {}/{}\t Time: {:.3f}\t Loss_en: {:.8f}\t Loss_ae: {:.8f}'
-                        .format(epoch + 1, self.n_epochs, epoch_train_time, loss1_epoch / n_batches, loss2_epoch / n_batches))
+            logger.info('  Epoch {}/{}\t Time: {:.3f}\t Loss_en: {:.8f}\t Loss_ae: {:.8f}\t Loss_total'
+                        .format(epoch + 1, self.n_epochs, epoch_train_time, loss1_epoch / n_batches, loss2_epoch / n_batches, (loss1_epoch + loss2_epoch)/n_batches))
 
         self.train_time = time.time() - start_time
         logger.info('Training time: %.3f' % self.train_time)
